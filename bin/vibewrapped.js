@@ -11,6 +11,7 @@ import { svgToPng } from '../src/render.js';
 import { pickPersona } from '../src/persona.js';
 import { compact, dateRange, hourLabel } from '../src/format.js';
 import { DEFAULT_DAYS, keepHistory, retentionDays } from '../src/retention.js';
+import { copyImage } from '../src/clipboard.js';
 
 const HELP = `vibewrapped — Spotify Wrapped for your AI coding agent
 
@@ -20,7 +21,7 @@ Usage: npx vibewrapped [options]
   --dir <path>     Claude config dir (default: $CLAUDE_CONFIG_DIR or ~/.claude); repeatable
   --out <file>     Where to save the card (default: ./vibewrapped.png)
   --json           Print the raw stats as JSON instead of the card
-  --share          Open a pre-filled post on X (you attach the image)
+  --share          Copy the card to your clipboard and open a pre-filled post on X
   --keep           Stop Claude Code from deleting history after 30 days
                    (sets cleanupPeriodDays to 3650 in settings.json)
   --no-open        Do not open the card when done
@@ -145,6 +146,9 @@ if (!values['no-open']) open(out);
 
 if (values.share) {
   const text = `My vibe coding wrapped: ${compact(stats.tokens.total)} tokens, ${stats.sessions} sessions, and I'm "${persona.name}".\n\n${hi.quote} ×${hi.count} 💀\n\nGet yours: npx vibewrapped`;
+  const copied = await copyImage(out);
   open(`https://x.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent('https://github.com/eliseomdq/vibewrapped')}`);
-  process.stdout.write('  Opened X in your browser. Attach the card and post.\n');
+  process.stdout.write(copied
+    ? '  Opened X in your browser. The card is on your clipboard: paste it into the post.\n'
+    : '  Opened X in your browser. Attach the card and post.\n');
 }

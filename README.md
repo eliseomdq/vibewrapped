@@ -34,7 +34,7 @@ It sets `cleanupPeriodDays` to 3650 in your `~/.claude/settings.json` and leaves
 --dir <path>     Claude config dir (default: $CLAUDE_CONFIG_DIR or ~/.claude); repeatable
 --out <file>     Where to save the card (default: ./vibewrapped.png)
 --json           Print the raw stats as JSON
---share          Open a pre-filled post on X (you attach the image)
+--share          Copy the card to your clipboard and open a pre-filled post on X
 --keep           Stop Claude Code from deleting history after 30 days
 --no-open        Do not open the card when done
 ```
