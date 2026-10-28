@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, writeFile } from 'node:fs/promises';
+import { chmod, mkdtemp, readFile, stat, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { keepHistory, retentionDays, KEEP_DAYS } from '../src/retention.js';
@@ -54,4 +54,19 @@ test('refuses settings that are valid JSON but not an object', async () => {
 
 test('fails clearly when the config dir does not exist', async () => {
   await assert.rejects(keepHistory(path.join(await dir(), 'missing')), /does not exist/);
+});
+
+test('keeps the original file permissions, since settings.json can hold API keys', { skip: process.platform === 'win32' }, async () => {
+  const d = await dir();
+  const file = path.join(d, 'settings.json');
+  await writeFile(file, '{"env":{"ANTHROPIC_API_KEY":"x"}}', { mode: 0o600 });
+  await chmod(file, 0o600);
+  await keepHistory(d);
+  assert.equal((await stat(file)).mode & 0o777, 0o600);
+});
+
+test('creates a new settings.json readable only by the user', { skip: process.platform === 'win32' }, async () => {
+  const d = await dir();
+  await keepHistory(d);
+  assert.equal((await stat(path.join(d, 'settings.json'))).mode & 0o777, 0o600);
 });

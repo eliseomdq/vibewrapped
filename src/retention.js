@@ -1,4 +1,5 @@
-import { readFile, rename, stat, writeFile } from 'node:fs/promises';
+import { randomUUID } from 'node:crypto';
+import { chmod, readFile, rename, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 // Claude Code deletes transcripts older than cleanupPeriodDays, 30 by default.
@@ -46,8 +47,11 @@ export async function keepHistory(claudeDir) {
   const before = typeof settings.cleanupPeriodDays === 'number' ? settings.cleanupPeriodDays : null;
   if (before !== null && before >= KEEP_DAYS) return { before, after: before };
   const file = path.join(claudeDir, 'settings.json');
-  const tmp = `${file}.vibewrapped-${process.pid}.tmp`;
-  await writeFile(tmp, `${JSON.stringify({ ...settings, cleanupPeriodDays: KEEP_DAYS }, null, 2)}\n`);
+  // settings.json can hold API keys in its env block: keep its mode, and default new files to 0600.
+  const mode = await stat(file).then((s) => s.mode & 0o777, () => 0o600);
+  const tmp = `${file}.vibewrapped-${randomUUID()}.tmp`;
+  await writeFile(tmp, `${JSON.stringify({ ...settings, cleanupPeriodDays: KEEP_DAYS }, null, 2)}\n`, { mode, flag: 'wx' });
+  await chmod(tmp, mode);
   await rename(tmp, file);
   return { before, after: KEEP_DAYS };
 }
