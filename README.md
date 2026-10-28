@@ -15,7 +15,7 @@ npx github:eliseomdq/vibewrapped
 - **Tokens** you pushed through Claude Code (cache included, deduplicated per message)
 - **Your coding persona**: The 3AM Shipper, The Orchestrator, The Backseat Driver, The Terminal Goblin…
 - Sessions, hours with your agent, longest day streak, prompts, tool calls, peak hour
-- The meme stat: how many times Claude told you **"You're absolutely right!"**
+- **Claude's catchphrase**: the verbal tic it repeated most to you ("Let me…", "Perfect!", "Good catch"…), and if it still says it, the legendary **"You're absolutely right!"** count
 
 ## ⚠️ Claude Code is deleting your history
 

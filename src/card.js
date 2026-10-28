@@ -18,8 +18,12 @@ const C = {
  * @param {import('./stats.js').Stats} stats
  */
 export function highlight(stats) {
-  if (stats.absolutelyRight > 0) {
+  if (stats.absolutelyRight >= 10) {
     return { quote: '“You’re absolutely right!”', count: stats.absolutelyRight, caption: 'times Claude said it to you' };
+  }
+  const [top] = stats.catchphrases;
+  if (top) {
+    return { quote: `“${top.name}”`, count: top.count, caption: 'Claude’s catchphrase: times it said it to you' };
   }
   if (stats.interrupts > 0) {
     return { quote: 'Esc pressed mid-answer', count: stats.interrupts, caption: 'times you stopped Claude to correct it' };

@@ -75,6 +75,19 @@ test('counts "you\'re absolutely right" once per distinct text block, in English
   assert.equal(stats.absolutelyRight, 2);
 });
 
+test('ranks Claude\'s catchphrases, counting each text block once', async () => {
+  const lines = [
+    assistant({ id: 'm1', ts: '2026-03-01T10:00:00Z', block: { type: 'text', text: 'Let me check the logs.' } }),
+    assistant({ id: 'm1', ts: '2026-03-01T10:00:00Z', block: { type: 'text', text: 'Let me check the logs.' } }),
+    assistant({ id: 'm2', ts: '2026-03-01T10:01:00Z', block: { type: 'text', text: 'Good catch. Let me fix it.' } }),
+    assistant({ id: 'm3', ts: '2026-03-01T10:02:00Z', block: { type: 'text', text: 'Perfect! Tests pass.' } }),
+    assistant({ id: 'm4', ts: '2026-03-01T10:03:00Z', block: { type: 'text', text: 'Tenés razón, me equivoqué.' } }),
+  ];
+  const stats = await computeStats(source([['a.jsonl', lines]]), { timeZone: TZ });
+  assert.deepEqual(stats.catchphrases[0], { name: 'Let me…', count: 2 });
+  assert.equal(stats.catchphrases.length, 3);
+});
+
 test('uses the last cost-state per file and reports null cost when no file has one', async () => {
   const withCost = [
     { type: 'cost-state', totalCostUSD: 1.5 },

@@ -1,5 +1,19 @@
 const BREAK_MS = 30 * 60 * 1000;
 const ABSOLUTELY_RIGHT = /you('| a)?re absolutely right|ten[eé]s toda la raz[oó]n|tienes toda la raz[oó]n/i;
+// Verbal tics counted in Claude's replies; the most frequent one becomes the card's catchphrase.
+const CATCHPHRASES = [
+  ['Let me…', /\blet me\b/i],
+  ['You’re right', /\byou('| a)re (absolutely )?right\b/i],
+  ['Perfect!', /^perfect[!.]/im],
+  ['Great question', /\bgreat question\b/i],
+  ['Good catch', /\bgood catch\b/i],
+  ['My mistake', /\bmy (mistake|bad)\b|\bI apologi[sz]e\b/i],
+  ['Done.', /^done[!.]/im],
+  ['Déjame…', /\bd[eé]jame\b/i],
+  ['Tenés razón', /\bten[eé]s (toda la )?raz[oó]n|\btienes (toda la )?raz[oó]n/i],
+  ['Me equivoqué', /\bme equivoqu[eé]/i],
+  ['Listo.', /^listo[!.]/im],
+];
 const POLITE = /\b(please|pls|plz|thanks|thank you|ty)\b|por favor|gracias/i;
 const INTERRUPT = /^\[Request interrupted by user/;
 // Tags Claude Code wraps around messages it injects as "user" turns.
@@ -13,7 +27,7 @@ const SYSTEM_TAG = /^<(task-notification|fork-boilerplate|local-command-caveat|l
  *   sessions: number, subagentRuns: number, prompts: number, interrupts: number,
  *   politePrompts: number, messages: number, toolCalls: number, absolutelyRight: number,
  *   tokens: { input: number, output: number, cacheRead: number, cacheWrite: number, total: number },
- *   costUSD: number | null, topTools: Ranked[], topModels: Ranked[],
+ *   costUSD: number | null, topTools: Ranked[], topModels: Ranked[], catchphrases: Ranked[],
  *   activeDays: number, longestStreak: number, peakHour: number | null,
  *   hours: number[], activeMinutes: number, longestSessionMinutes: number,
  * }} Stats
@@ -98,6 +112,7 @@ export async function computeStats(records, { timeZone, since, until }) {
   let interrupts = 0;
   let politePrompts = 0;
   let absolutelyRight = 0;
+  const phrases = new Map();
   let first = null;
   let last = null;
 
@@ -167,11 +182,13 @@ export async function computeStats(records, { timeZone, since, until }) {
         toolIds.add(block.id);
         tools.set(block.name, (tools.get(block.name) ?? 0) + 1);
       }
-      if (block?.type === 'text' && typeof block.text === 'string' && ABSOLUTELY_RIGHT.test(block.text)) {
+      if (block?.type === 'text' && typeof block.text === 'string') {
         const key = `${message.id}:${block.text}`;
-        if (!textBlocks.has(key)) {
-          textBlocks.add(key);
-          absolutelyRight++;
+        if (textBlocks.has(key)) continue;
+        textBlocks.add(key);
+        if (ABSOLUTELY_RIGHT.test(block.text)) absolutelyRight++;
+        for (const [label, pattern] of CATCHPHRASES) {
+          if (pattern.test(block.text)) phrases.set(label, (phrases.get(label) ?? 0) + 1);
         }
       }
     }
@@ -201,6 +218,7 @@ export async function computeStats(records, { timeZone, since, until }) {
     costUSD: costByFile.size && !since && !until ? [...costByFile.values()].reduce((a, b) => a + b, 0) : null,
     topTools: rank(tools, 5),
     topModels: rank(models, 3),
+    catchphrases: rank(phrases, 3),
     activeDays: days.size,
     longestStreak: longestStreak([...days].sort()),
     peakHour: peak > 0 ? hours.indexOf(peak) : null,
