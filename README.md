@@ -3,10 +3,10 @@
 **Spotify Wrapped for your AI coding agent.** One command turns your local Claude Code history into a card you'll actually want to post.
 
 ```bash
-npx github:eliseomdq/vibewrapped
+npx vibewrapped
 ```
 
-![Vibe Coding Wrapped card](docs/card.png)
+![Vibe Coding Wrapped card](https://raw.githubusercontent.com/eliseomdq/vibewrapped/main/docs/card.png)
 
 *Sample card. Yours is built from your own sessions.*
 
@@ -22,7 +22,7 @@ npx github:eliseomdq/vibewrapped
 By default Claude Code deletes session transcripts older than **30 days** ([`cleanupPeriodDays`](https://code.claude.com/docs/en/settings-reference#cleanupperioddays)). If you want your December wrapped to cover more than November, run this today:
 
 ```bash
-npx github:eliseomdq/vibewrapped --keep
+npx vibewrapped --keep
 ```
 
 It sets `cleanupPeriodDays` to 3650 in your `~/.claude/settings.json` and leaves every other setting alone.

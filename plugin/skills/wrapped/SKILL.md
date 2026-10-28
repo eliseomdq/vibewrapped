@@ -6,7 +6,7 @@ description: Generate the user's Vibe Coding Wrapped card from their local Claud
 Run this command and show the user its terminal output:
 
 ```bash
-npx -y github:eliseomdq/vibewrapped
+npx -y vibewrapped
 ```
 
 It reads the session transcripts under `~/.claude/projects` (or `$CLAUDE_CONFIG_DIR`) locally, saves `vibewrapped.png` in the current directory and opens it. Nothing is uploaded.
