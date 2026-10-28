@@ -1,0 +1,12 @@
+{
+  "name": "vibewrapped",
+  "description": "Spotify Wrapped for your AI coding agent",
+  "owner": { "name": "eliseomdq" },
+  "plugins": [
+    {
+      "name": "vibewrapped",
+      "source": "./plugin",
+      "description": "Turn your Claude Code history into a shareable Wrapped card. Run /vibewrapped:wrapped."
+    }
+  ]
+}
